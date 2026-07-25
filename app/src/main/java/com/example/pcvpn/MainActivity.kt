@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isDarkTheme by remember { mutableStateOf(profileManager.isDarkTheme()) }
+            var currentLanguage by remember { mutableStateOf(profileManager.getAppLanguage()) }
             var profiles by remember { mutableStateOf(profileManager.getProfiles()) }
             var selectedProfile by remember { mutableStateOf(profileManager.getSelectedProfile()) }
 
@@ -53,12 +54,18 @@ class MainActivity : ComponentActivity() {
                     MainScreen(
                         vpnState = vpnState,
                         isDarkTheme = isDarkTheme,
+                        currentLanguage = currentLanguage,
                         profiles = profiles,
                         selectedProfile = selectedProfile,
                         onToggleTheme = {
                             val nextTheme = !isDarkTheme
                             isDarkTheme = nextTheme
                             profileManager.setDarkTheme(nextTheme)
+                        },
+                        onToggleLanguage = {
+                            val nextLang = if (currentLanguage == "en") "ru" else "en"
+                            currentLanguage = nextLang
+                            profileManager.setAppLanguage(nextLang)
                         },
                         onSelectProfile = { profile ->
                             profileManager.setSelectedProfileId(profile.id)
@@ -76,7 +83,8 @@ class MainActivity : ComponentActivity() {
                         },
                         onConnectClick = { profile ->
                             if (profile.host.isBlank()) {
-                                Toast.makeText(this, "Пожалуйста, введите имя компьютера или IP-адрес", Toast.LENGTH_SHORT).show()
+                                val msg = com.example.pcvpn.utils.AppStrings.get("enterHostToast", currentLanguage)
+                                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                                 return@MainScreen
                             }
                             requestVpnAndConnect(profile.host, profile.port, profile.login, profile.password)

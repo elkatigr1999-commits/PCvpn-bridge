@@ -76,4 +76,12 @@ class ProfileManager(context: Context) {
     fun setDarkTheme(isDark: Boolean) {
         prefs.edit().putBoolean("key_dark_theme", isDark).apply()
     }
+
+    fun getAppLanguage(): String {
+        return prefs.getString("key_app_language", "en") ?: "en"
+    }
+
+    fun setAppLanguage(lang: String) {
+        prefs.edit().putString("key_app_language", lang).apply()
+    }
 }

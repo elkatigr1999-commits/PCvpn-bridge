@@ -16,15 +16,19 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pcvpn.data.VpnProfile
+import com.example.pcvpn.utils.AppStrings
 import com.example.pcvpn.utils.MdnsResolver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditProfileDialog(
     profileToEdit: VpnProfile? = null,
+    currentLanguage: String = "en",
     onDismiss: () -> Unit,
     onSave: (name: String, host: String, port: Int, login: String, pass: String) -> Unit
 ) {
+    val isEn = currentLanguage.lowercase() == "en"
+
     var profileName by remember { mutableStateOf(profileToEdit?.name ?: "") }
     var hostInput by remember { mutableStateOf(profileToEdit?.host ?: "") }
     var portInput by remember { mutableStateOf(profileToEdit?.port?.toString() ?: "4066") }
@@ -46,7 +50,7 @@ fun AddEditProfileDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = if (profileToEdit == null) "Новый профиль" else "Редактирование профиля",
+                text = if (profileToEdit == null) AppStrings.get("addProfile", currentLanguage) else AppStrings.get("editProfile", currentLanguage),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
@@ -58,12 +62,12 @@ fun AddEditProfileDialog(
                     .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Название профиля
+                // Profile Name
                 OutlinedTextField(
                     value = profileName,
                     onValueChange = { profileName = it },
-                    label = { Text("Название профиля") },
-                    placeholder = { Text("например: Домашний ПК") },
+                    label = { Text(AppStrings.get("profileName", currentLanguage)) },
+                    placeholder = { Text(if (isEn) "e.g. Home PC" else "например: Домашний ПК") },
                     leadingIcon = {
                         Icon(Icons.Default.Bookmark, contentDescription = null)
                     },
@@ -72,22 +76,22 @@ fun AddEditProfileDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Имя компьютера или IP-адрес
+                // Host or IP
                 OutlinedTextField(
                     value = hostInput,
                     onValueChange = { hostInput = it },
-                    label = { Text("Имя компьютера или IP-адрес") },
-                    placeholder = { Text("например, desktop-pc или pcvpn") },
+                    label = { Text(AppStrings.get("hostAddress", currentLanguage)) },
+                    placeholder = { Text(if (isEn) "e.g. desktop-pc or 192.168.1.10" else "например: desktop-pc или 192.168.1.10") },
                     supportingText = {
                         if (formattedHostPreview.isNotEmpty()) {
-                            val typeLabel = if (isIp) "IP-адрес" else "mDNS адрес"
+                            val typeLabel = if (isIp) "IP" else "mDNS"
                             Text(
                                 "$typeLabel: $formattedHostPreview",
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
-                            Text("Автоопределение: IP или хост (.local)")
+                            Text(if (isEn) "Auto-detection: IP or host (.local)" else "Автоопределение: IP или хост (.local)")
                         }
                     },
                     leadingIcon = {
@@ -101,7 +105,7 @@ fun AddEditProfileDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Порт (цифровая клавиатура, по умолчанию 4066)
+                // Port (default 4066)
                 OutlinedTextField(
                     value = portInput,
                     onValueChange = { input ->
@@ -109,7 +113,7 @@ fun AddEditProfileDialog(
                             portInput = input
                         }
                     },
-                    label = { Text("Порт (по умолчанию 4066)") },
+                    label = { Text(AppStrings.get("port", currentLanguage)) },
                     placeholder = { Text("4066") },
                     leadingIcon = {
                         Icon(Icons.Default.Numbers, contentDescription = null)
@@ -122,12 +126,12 @@ fun AddEditProfileDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Логин (необязательно)
+                // Login (optional)
                 OutlinedTextField(
                     value = login,
                     onValueChange = { login = it },
-                    label = { Text("Логин (необязательно)") },
-                    placeholder = { Text("Введите логин") },
+                    label = { Text(AppStrings.get("loginOptional", currentLanguage)) },
+                    placeholder = { Text(if (isEn) "Enter login" else "Введите логин") },
                     leadingIcon = {
                         Icon(Icons.Default.Person, contentDescription = null)
                     },
@@ -136,12 +140,12 @@ fun AddEditProfileDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Пароль (необязательно)
+                // Password (optional)
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Пароль (необязательно)") },
-                    placeholder = { Text("Введите пароль") },
+                    label = { Text(AppStrings.get("passwordOptional", currentLanguage)) },
+                    placeholder = { Text(if (isEn) "Enter password" else "Введите пароль") },
                     leadingIcon = {
                         Icon(Icons.Default.Lock, contentDescription = null)
                     },
@@ -167,18 +171,19 @@ fun AddEditProfileDialog(
             Button(
                 onClick = {
                     val parsedPort = portInput.toIntOrNull() ?: 4066
-                    val finalName = if (profileName.isBlank()) hostInput.ifBlank { "Профиль" } else profileName
+                    val defaultProfileName = if (isEn) "Profile" else "Профиль"
+                    val finalName = if (profileName.isBlank()) hostInput.ifBlank { defaultProfileName } else profileName
                     onSave(finalName, hostInput, parsedPort, login, password)
                 },
                 enabled = hostInput.isNotBlank(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Сохранить")
+                Text(AppStrings.get("save", currentLanguage))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена")
+                Text(AppStrings.get("cancel", currentLanguage))
             }
         }
     )

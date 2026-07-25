@@ -1,6 +1,8 @@
 # PC VPN Bridge
 
-Android-приложение для туннелирования всего трафика смартфона через прокси-сервер вашего компьютера (SOCKS5 / HTTP CONNECT).
+[English](README.md) | [Русский](README.ru.md)
+
+An Android application for tunneling smartphone traffic through a local computer proxy (SOCKS5 / HTTP CONNECT).
 
 ![Android](https://img.shields.io/badge/Platform-Android-green.svg)
 ![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)
@@ -9,73 +11,72 @@ Android-приложение для туннелирования всего тр
 
 ---
 
-## 🚀 Описание
+## 🚀 Overview
 
-**PC VPN Bridge** превращает любой открытый SOCKS5 или HTTP CONNECT прокси-сервер на вашем компьютере (v2rayN, Clash, Hiddify, NekoBox, HTTP Custom, 3proxy и др.) в полноценный системный VPN-туннель на Android.
+**PC VPN Bridge** turns any SOCKS5 or HTTP CONNECT proxy running on your computer (v2rayN, Clash, Hiddify, NekoBox, HTTP Custom, 3proxy, etc.) into a full system-wide Android VPN tunnel.
 
-Приложение спроектировано для обеспечения максимальной скорости передачи данных, обхода сетевых ограничений и работы с ресурсоемкими сервисами (Telegram, YouTube 4K, Instagram и др.).
-
----
-
-## ✨ Ключевые возможности
-
-- ⚡ **Автоопределение протоколов**: Автоматически распознает **SOCKS5**, **HTTP CONNECT** или **Direct TCP** на порту ПК (по умолчанию `4066`).
-- 🌐 **Нативная поддержка `.local` имен (mDNS RFC 6762)**: Отправляет широковещательные UDP-запросы по сети Wi-Fi для мгновенного определения IP-адресов ПК (например, `matebook.local`) за 10 мс в обход настроек роутера.
-- 📺 **Полная поддержка YouTube и тяжелого медиа-трафика**:
-  - **Сегментация по MSS 1460 байт**: Крупные видеоданные автоматически нарезываются на стандартные валидные пакеты под лимит MTU 1500 интерфейса TUN Android.
-  - **Защищенный двухрежимный DNS**: Нативный резолв доменов через Google Public DNS `8.8.8.8:53` в обход подмены DNS со стороны провайдеров.
-- 🛡️ **Защита от вылетов при быстром переключении**:
-  - Атомарная синхронизация сокетов через `Mutex`.
-  - Мгновенное переиспользование локальных портов (`reuseAddress = true`).
-  - Потокобезопасная последовательная передача TCP-пакетов без нарушений порядка.
-- 📊 **Встроенная консоль диагностики в реальном времени**:
-  - Трансляция логов подключения, DNS-запросов и статусов туннелирования прямо в интерфейсе приложения.
-  - Копирование всего лога в один клик.
-- 🎨 **Современный дизайн на Jetpack Compose (Material 3)**:
-  - Премиальный чистый интерфейс без синих и белых рамок.
-  - Поддержка Тёмной и Светлой темы оформления с сохранением настроек.
-  - Адаптивная иконка приложения.
+Designed for maximum speed, bypass of network throttling, and seamless streaming (Telegram, YouTube 4K, Instagram, etc.).
 
 ---
 
-## 🛠️ Архитектура подключения
+## ✨ Features
+
+- ⚡ **Protocol Auto-Detection**: Automatically detects **SOCKS5**, **HTTP CONNECT**, or **Direct TCP** on your PC proxy port (default `4066`).
+- 🌐 **Native `.local` Hostname Resolution (mDNS RFC 6762)**: Sends multicast UDP queries over Wi-Fi to resolve PC IP addresses (`matebook.local`) in 10ms without router dependencies.
+- 📺 **YouTube 4K & Media Streaming**:
+  - **MSS 1460 Payload Segmentation**: Large video streams are segmented into MTU-compliant 1500-byte IP packets.
+  - **Protected Dual-Engine DNS**: Resolves real IPv4 addresses via Google Public DNS `8.8.8.8:53` bypassing ISP DNS poisoning.
+- 🛡️ **Crash-Proof Synchronization**:
+  - Atomic thread safety via `Mutex`.
+  - Instant socket port reuse (`reuseAddress = true`).
+  - Guaranteed in-order TCP payload delivery.
+- 📊 **Real-Time Diagnostic Log Console**:
+  - Live streaming of connection states, DNS queries, and tunnel logs directly in the app.
+  - One-click log copying to clipboard.
+- 🎨 **Jetpack Compose Material 3 UI**:
+  - Multilingual support (English & Russian, English by default).
+  - Modern borderless design, Dark/Light theme switching, adaptive launcher icon.
+
+---
+
+## 🛠️ Connection Architecture
 
 ```
-[ Android Смартфон ]
+[ Android Smartphone ]
         │
-        ├──> VpnService (Интерфейс TUN 10.0.0.2 / MTU 1500)
+        ├──> VpnService (TUN Interface 10.0.0.2 / MTU 1500)
         │         │
-        │         └──> Socks5Tun2Socks (Защищенный DNS 8.8.8.8 + MSS 1460)
+        │         └──> Socks5Tun2Socks (Protected DNS 8.8.8.8 + MSS 1460)
         │                   │
-        └─── (Wi-Fi) ───────┼────────> [ ПК / Прокси 192.168.x.x:4066 ]
+        └─── (Wi-Fi) ───────┼────────> [ PC / Proxy 192.168.x.x:4066 ]
                             │                     │
-                            └─────────────────────┴──> (Интернет / VPN ПК)
+                            └─────────────────────┴──> (Internet / PC VPN)
 ```
 
 ---
 
-## 📱 Сборка и установка
+## 📱 Build & Installation
 
-### Требования
-- Android 8.0 (API Level 26) или выше
+### Requirements
+- Android 8.0 (API Level 26) or higher
 - JDK 17 / Kotlin 1.9+
-- Android Studio Ladybug / Jellyfish или Gradle CLI
+- Android Studio or Gradle CLI
 
-### Сборка APK из исходников
+### Building from Source
 
 ```bash
-# Клонирование репозитория
+# Clone the repository
 git clone https://github.com/elkatigr1999-commits/PCvpn-bridge.git
 cd PCvpn-bridge
 
-# Сборка Debug APK
+# Build Debug APK
 ./gradlew assembleDebug
 ```
 
-Собраное приложение будет доступно в: `app/build/outputs/apk/debug/app-debug.apk`.
+The compiled APK will be located at: `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 
-## 📄 Лицензия
+## 📄 License
 
-Проект распространяется под лицензией **MIT License**.
+Distributed under the **MIT License**.

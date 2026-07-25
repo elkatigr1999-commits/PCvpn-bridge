@@ -27,16 +27,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.pcvpn.utils.AppLogger
+import com.example.pcvpn.utils.AppStrings
 import com.example.pcvpn.utils.LogEntry
 import com.example.pcvpn.utils.LogLevel
 
 @Composable
-fun LogDialog(onDismiss: () -> Unit) {
+fun LogDialog(
+    currentLanguage: String = "en",
+    onDismiss: () -> Unit
+) {
     val context = LocalContext.current
     val logs by AppLogger.logs.collectAsState()
     val listState = rememberLazyListState()
 
-    // Автопрокрутка вниз при поступлении новых логов
     LaunchedEffect(logs.size) {
         if (logs.isNotEmpty()) {
             listState.animateScrollToItem(logs.size - 1)
@@ -60,14 +63,13 @@ fun LogDialog(onDismiss: () -> Unit) {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Заголовок и кнопки действий
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Логи подключения",
+                        text = AppStrings.get("logsTitle", currentLanguage),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -75,34 +77,32 @@ fun LogDialog(onDismiss: () -> Unit) {
                     )
 
                     Row {
-                        // Кнопка Копировать
                         IconButton(onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText("PCVPN Logs", AppLogger.getAllLogsText())
                             clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Логи скопированы в буфер", Toast.LENGTH_SHORT).show()
+                            val toastMsg = AppStrings.get("copiedToast", currentLanguage)
+                            Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Копировать",
+                                contentDescription = AppStrings.get("copy", currentLanguage),
                                 tint = Color(0xFF89B4FA)
                             )
                         }
 
-                        // Кнопка Очистить
                         IconButton(onClick = { AppLogger.clear() }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Очистить",
+                                contentDescription = AppStrings.get("clear", currentLanguage),
                                 tint = Color(0xFFF38BA8)
                             )
                         }
 
-                        // Кнопка Закрыть
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Закрыть",
+                                contentDescription = AppStrings.get("close", currentLanguage),
                                 tint = Color.Gray
                             )
                         }
@@ -111,7 +111,6 @@ fun LogDialog(onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Консольный список логов
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -121,7 +120,7 @@ fun LogDialog(onDismiss: () -> Unit) {
                 ) {
                     if (logs.isEmpty()) {
                         Text(
-                            text = "Логи отсутствуют. Нажмите «Подключить» для старта диагностирования.",
+                            text = AppStrings.get("noLogs", currentLanguage),
                             color = Color.Gray,
                             fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
@@ -146,10 +145,10 @@ fun LogDialog(onDismiss: () -> Unit) {
 @Composable
 fun LogItemRow(log: LogEntry) {
     val levelColor = when (log.level) {
-        LogLevel.SUCCESS -> Color(0xFFA6E3A1) // Зеленый
-        LogLevel.INFO -> Color(0xFF89B4FA)    // Синий
-        LogLevel.WARN -> Color(0xFFF9E2AF)    // Желтый
-        LogLevel.ERROR -> Color(0xFFF38BA8)   // Красный
+        LogLevel.SUCCESS -> Color(0xFFA6E3A1)
+        LogLevel.INFO -> Color(0xFF89B4FA)
+        LogLevel.WARN -> Color(0xFFF9E2AF)
+        LogLevel.ERROR -> Color(0xFFF38BA8)
     }
 
     Column(modifier = Modifier.padding(vertical = 2.dp)) {

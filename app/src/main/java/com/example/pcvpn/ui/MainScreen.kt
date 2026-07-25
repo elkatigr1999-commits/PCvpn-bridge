@@ -17,16 +17,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pcvpn.data.VpnProfile
 import com.example.pcvpn.service.SocksVpnService.VpnState
-import com.example.pcvpn.utils.MdnsResolver
+import com.example.pcvpn.utils.AppStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     vpnState: VpnState,
     isDarkTheme: Boolean,
+    currentLanguage: String = "en",
     profiles: List<VpnProfile>,
     selectedProfile: VpnProfile?,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     onSelectProfile: (VpnProfile) -> Unit,
     onSaveProfile: (profile: VpnProfile) -> Unit,
     onDeleteProfile: (profileId: String) -> Unit,
@@ -42,7 +44,7 @@ fun MainScreen(
     val isConnecting = vpnState is VpnState.Connecting
 
     if (showLogDialog) {
-        LogDialog(onDismiss = { showLogDialog = false })
+        LogDialog(currentLanguage = currentLanguage, onDismiss = { showLogDialog = false })
     }
 
     Scaffold(
@@ -50,23 +52,32 @@ fun MainScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "PC VPN",
+                        AppStrings.get("appTitle", currentLanguage),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 actions = {
+                    // Переключатель языка EN / RU
+                    TextButton(onClick = onToggleLanguage) {
+                        Text(
+                            text = if (currentLanguage == "en") "EN" else "RU",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                     IconButton(onClick = { showLogDialog = true }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                            contentDescription = "Логи соединения",
+                            contentDescription = AppStrings.get("logsTitle", currentLanguage),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     IconButton(onClick = onToggleTheme) {
                         Icon(
                             imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -127,10 +138,10 @@ fun MainScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = when (vpnState) {
-                                is VpnState.Connected -> "Подключено"
-                                is VpnState.Connecting -> "Подключение..."
-                                is VpnState.Error -> "Ошибка"
-                                else -> "Отключено"
+                                is VpnState.Connected -> AppStrings.get("connected", currentLanguage)
+                                is VpnState.Connecting -> AppStrings.get("connecting", currentLanguage)
+                                is VpnState.Error -> AppStrings.get("error", currentLanguage)
+                                else -> AppStrings.get("disconnected", currentLanguage)
                             },
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
@@ -144,10 +155,10 @@ fun MainScreen(
 
                         Text(
                             text = when (vpnState) {
-                                is VpnState.Connected -> "Адрес: ${vpnState.host}:${vpnState.port} (${vpnState.ip})"
-                                is VpnState.Connecting -> "Установление SOCKS5 соединения..."
+                                is VpnState.Connected -> "${AppStrings.get("addressPrefix", currentLanguage)}: ${vpnState.host}:${vpnState.port} (${vpnState.ip})"
+                                is VpnState.Connecting -> AppStrings.get("establishingStatus", currentLanguage)
                                 is VpnState.Error -> vpnState.message
-                                else -> "Готов к подключению SOCKS5"
+                                else -> AppStrings.get("readyStatus", currentLanguage)
                             },
                             fontSize = 13.sp,
                             color = if (vpnState is VpnState.Disconnected) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified
@@ -163,8 +174,6 @@ fun MainScreen(
                     }
                 }
             }
-
-
 
             // 2. Блок выбора и управления профилями
             Card(
@@ -184,84 +193,58 @@ fun MainScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Профиль подключения",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.primary
+                            text = if (currentLanguage == "en") "VPN Profiles" else "Профили VPN",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
 
-                        // Кнопка «Плюсик» + для создания нового профиля
-                        IconButton(
-                            onClick = {
-                                profileToEdit = null
-                                showAddEditDialog = true
-                            },
-                            enabled = !isConnected && !isConnecting
-                        ) {
+                        IconButton(onClick = {
+                            profileToEdit = null
+                            showAddEditDialog = true
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Добавить профиль",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
+                                contentDescription = AppStrings.get("addProfile", currentLanguage),
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
 
-                    // Селектор сохраненных профилей
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedCard(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable(enabled = !isConnected && !isConnecting && profiles.isNotEmpty()) {
-                                    dropdownExpanded = true
-                                },
+                                .clickable { dropdownExpanded = true },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        imageVector = if (selectedProfile != null && MdnsResolver.isIpAddress(selectedProfile.host))
-                                            Icons.Default.Router else Icons.Default.Computer,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = selectedProfile?.name ?: AppStrings.get("addProfile", currentLanguage),
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 16.sp
                                     )
-                                    Column {
+                                    if (selectedProfile != null) {
                                         Text(
-                                            text = selectedProfile?.name ?: if (profiles.isEmpty()) "Нет профилей (нажмите +)" else "Выберите профиль",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp
+                                            text = "${selectedProfile.host}:${selectedProfile.port}",
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
-                                        if (selectedProfile != null) {
-                                            val formattedHost = MdnsResolver.formatHost(selectedProfile.host)
-                                            Text(
-                                                text = "$formattedHost:${selectedProfile.port}",
-                                                fontSize = 12.sp,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
                                     }
                                 }
 
-                                if (profiles.isNotEmpty()) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowDropDown,
-                                        contentDescription = null
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null
+                                )
                             }
                         }
 
-                        // Выпадающее меню со списком профилей
                         DropdownMenu(
                             expanded = dropdownExpanded,
                             onDismissRequest = { dropdownExpanded = false },
@@ -272,84 +255,59 @@ fun MainScreen(
                                     text = {
                                         Column {
                                             Text(profile.name, fontWeight = FontWeight.Bold)
-                                            Text(
-                                                "${MdnsResolver.formatHost(profile.host)}:${profile.port}",
-                                                fontSize = 12.sp,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
+                                            Text("${profile.host}:${profile.port}", fontSize = 12.sp, color = Color.Gray)
                                         }
                                     },
                                     onClick = {
                                         onSelectProfile(profile)
                                         dropdownExpanded = false
                                     },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = if (MdnsResolver.isIpAddress(profile.host))
-                                                Icons.Default.Router else Icons.Default.Computer,
-                                            contentDescription = null
-                                        )
-                                    },
                                     trailingIcon = {
                                         Row {
-                                            IconButton(onClick = {
-                                                dropdownExpanded = false
-                                                profileToEdit = profile
-                                                showAddEditDialog = true
-                                            }) {
+                                            IconButton(
+                                                onClick = {
+                                                    dropdownExpanded = false
+                                                    profileToEdit = profile
+                                                    showAddEditDialog = true
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
                                                 Icon(
-                                                    Icons.Default.Edit,
-                                                    contentDescription = "Редактировать",
-                                                    modifier = Modifier.size(20.dp)
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = AppStrings.get("editProfile", currentLanguage),
+                                                    modifier = Modifier.size(18.dp)
                                                 )
                                             }
-                                            IconButton(onClick = {
-                                                onDeleteProfile(profile.id)
-                                            }) {
+
+                                            IconButton(
+                                                onClick = {
+                                                    dropdownExpanded = false
+                                                    onDeleteProfile(profile.id)
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
                                                 Icon(
-                                                    Icons.Default.Delete,
-                                                    contentDescription = "Удалить",
-                                                    tint = MaterialTheme.colorScheme.error,
-                                                    modifier = Modifier.size(20.dp)
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = AppStrings.get("deleteProfile", currentLanguage),
+                                                    tint = Color.Red,
+                                                    modifier = Modifier.size(18.dp)
                                                 )
                                             }
                                         }
                                     }
                                 )
                             }
-                        }
-                    }
 
-                    // Дополнительные кнопки редактирования / удаления выбранного профиля
-                    if (selectedProfile != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TextButton(
+                            HorizontalDivider()
+
+                            DropdownMenuItem(
+                                text = { Text("+ ${AppStrings.get("addProfile", currentLanguage)}", fontWeight = FontWeight.Bold) },
                                 onClick = {
-                                    profileToEdit = selectedProfile
+                                    dropdownExpanded = false
+                                    profileToEdit = null
                                     showAddEditDialog = true
-                                },
-                                enabled = !isConnected && !isConnecting
-                            ) {
-                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Изменить")
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            TextButton(
-                                onClick = { onDeleteProfile(selectedProfile.id) },
-                                enabled = !isConnected && !isConnecting,
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Удалить")
-                            }
+                                }
+                            )
                         }
                     }
                 }
@@ -357,7 +315,7 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // 3. Главная кнопка «Подключить» / «Отключить»
+            // 3. Главная кнопка подключения / отключения
             Button(
                 onClick = {
                     if (isConnected || isConnecting) {
@@ -386,9 +344,9 @@ fun MainScreen(
                         contentDescription = null
                     )
                     Text(
-                        text = if (isConnected || isConnecting) "Отключить"
-                        else if (selectedProfile != null) "Подключить (${selectedProfile.name})"
-                        else "Добавить профиль и подключить",
+                        text = if (isConnected || isConnecting) AppStrings.get("disconnect", currentLanguage)
+                        else if (selectedProfile != null) "${AppStrings.get("connect", currentLanguage)} (${selectedProfile.name})"
+                        else "${AppStrings.get("addProfile", currentLanguage)} & ${AppStrings.get("connect", currentLanguage)}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -401,6 +359,7 @@ fun MainScreen(
     if (showAddEditDialog) {
         AddEditProfileDialog(
             profileToEdit = profileToEdit,
+            currentLanguage = currentLanguage,
             onDismiss = { showAddEditDialog = false },
             onSave = { name, host, port, login, pass ->
                 val newOrUpdated = VpnProfile(
