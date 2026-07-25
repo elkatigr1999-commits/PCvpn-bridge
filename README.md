@@ -73,7 +73,7 @@ cd PCvpn-bridge
 ./gradlew assembleDebug
 ```
 
-The compiled APK will be located at: `app/build/outputs/apk/debug/app-debug.apk`.
+The compiled APK will be located at: `PCVPN-Bridge-v1.0.apk`.
 
 ---
 

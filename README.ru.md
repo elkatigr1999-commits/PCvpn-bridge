@@ -75,7 +75,7 @@ cd PCvpn-bridge
 ./gradlew assembleDebug
 ```
 
-Собраное приложение будет доступно в: `app/build/outputs/apk/debug/app-debug.apk`.
+Собраное приложение будет доступно по пути: `PCVPN-Bridge-v1.0.apk`.
 
 ---
 
