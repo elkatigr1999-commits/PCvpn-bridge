@@ -50,7 +50,8 @@ If you want to connect using your computer's name (e.g., `desktop-pc`) instead o
 1. Install **PC VPN Bridge** on your Android smartphone.
 2. Enter your PC's **Computer Name** (e.g., `desktop-pc`) or **IP Address** (e.g., `192.168.1.50`).
 3. Set the **Port** (default is **`4066`** for Karing).
-4. Tap **Connect**!
+4. **Login & Password** *(Optional)*: Enter username & password only if your PC proxy requires authentication; otherwise, leave them blank.
+5. Tap **Connect**!
 
 ---
 
@@ -58,6 +59,7 @@ If you want to connect using your computer's name (e.g., `desktop-pc`) instead o
 
 - ⚡ **Protocol Auto-Detection**: Automatically detects **SOCKS5**, **HTTP CONNECT**, or **Direct TCP** on your PC proxy port.
 - 🌐 **Native `.local` Hostname Resolution (mDNS RFC 6762)**: Sends multicast UDP queries over Wi-Fi to resolve PC IP addresses in 10ms.
+- 🔑 **Optional Authentication**: Supports optional login and password for authenticated SOCKS5/HTTP proxies.
 - 📺 **YouTube 4K & Media Streaming**:
   - **MSS 1460 Payload Segmentation**: Large video streams are segmented into MTU-compliant 1500-byte IP packets.
   - **Protected Dual-Engine DNS**: Resolves real IPv4 addresses via Google Public DNS `8.8.8.8:53` bypassing ISP DNS poisoning.
