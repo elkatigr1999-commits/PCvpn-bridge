@@ -29,21 +29,24 @@ To allow your smartphone to connect to your PC's proxy over Wi-Fi, you must enab
 
 ---
 
-### Step 2. Enable `.local` Hostnames on Windows (Highly Recommended)
+### Step 2. Enable `.local` Hostnames & Find Your PC Name
 
-If you want to connect using your computer's name (e.g., `matebook.local` or `pc.local`) instead of typing IP addresses:
+If you want to connect using your computer's name (e.g., `desktop-pc.local` or `my-pc.local`) instead of typing IP addresses:
 
 1. **Works on ANY Windows PC**: Although named "Apple Bonjour", this official service installs on **ALL Windows computers** (ASUS, Lenovo, Dell, HP, custom desktops, etc.).
 2. **Why this is better than IP addresses**: Local IP addresses (`192.168.x.x`) are dynamic and change whenever your router reboots or when you switch Wi-Fi networks. By using `.local` (mDNS), your smartphone will **always connect automatically on ANY Wi-Fi network**, even if your PC's IP address changes!
 3. **Download**: Install **[Bonjour Print Services for Windows (Official Apple Download)](https://support.apple.com/kb/DL999)** (*BonjourPrinterSetup.exe*).
-4. Once installed, your PC will automatically respond to `.local` queries from your smartphone in ~10ms.
+
+#### 🔍 How to Find Your PC Name:
+- **Windows**: Press `Win + X` ➔ **System** (or open **Settings ➔ System ➔ About**). Look for **Device Name** (e.g., `desktop-pc`). Add `.local` at the end: `desktop-pc.local`.
+- **macOS**: Open **System Settings ➔ General ➔ Sharing**. Look for **Local Hostname** at the bottom (e.g., `macbook-pro.local`).
 
 ---
 
 ### Step 3. Connect Android App
 
 1. Install **PC VPN Bridge** on your Android smartphone.
-2. Enter your PC's **Computer Name** (e.g., `matebook.local`) or **IP Address** (e.g., `192.168.1.50`).
+2. Enter your PC's **Computer Name** (e.g., `desktop-pc.local`) or **IP Address** (e.g., `192.168.1.50`).
 3. Set the **Port** (default is **`4066`** for Karing).
 4. Tap **Connect**!
 
