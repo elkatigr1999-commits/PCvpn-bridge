@@ -29,15 +29,14 @@ To allow your smartphone to connect to your PC's proxy over Wi-Fi, you must enab
 
 ---
 
-### Step 2. Enable `.local` Hostnames on Windows (Optional)
+### Step 2. Enable `.local` Hostnames on Windows (Highly Recommended)
 
-If you want to connect using your computer's name (e.g., `matebook.local` or `pc.local`) instead of typing IP addresses (`192.168.x.x`):
+If you want to connect using your computer's name (e.g., `matebook.local` or `pc.local`) instead of typing IP addresses:
 
-1. Windows requires **Apple Bonjour Service** to broadcast `.local` mDNS hostnames over Wi-Fi.
-2. Download and install **[Bonjour Print Services for Windows (Official Apple Download)](https://support.apple.com/kb/DL999)** (*BonjourPrinterSetup.exe* / *Bonjour Print Services*).
-3. Once installed, your PC will automatically respond to `.local` queries from your smartphone in ~10ms.
-
-> 💡 *Note: If you prefer entering direct IP addresses (e.g. `192.168.1.50`), installing Bonjour is optional.*
+1. **Works on ANY Windows PC**: Although named "Apple Bonjour", this official service installs on **ALL Windows computers** (ASUS, Lenovo, Dell, HP, custom desktops, etc.).
+2. **Why this is better than IP addresses**: Local IP addresses (`192.168.x.x`) are dynamic and change whenever your router reboots or when you switch Wi-Fi networks. By using `.local` (mDNS), your smartphone will **always connect automatically on ANY Wi-Fi network**, even if your PC's IP address changes!
+3. **Download**: Install **[Bonjour Print Services for Windows (Official Apple Download)](https://support.apple.com/kb/DL999)** (*BonjourPrinterSetup.exe*).
+4. Once installed, your PC will automatically respond to `.local` queries from your smartphone in ~10ms.
 
 ---
 
