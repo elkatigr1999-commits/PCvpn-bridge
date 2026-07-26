@@ -39,6 +39,32 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="SOCKS5 VPN Tunneling for local network computers" />
         </service>
+
+        <!-- Плитка быстрой настройки в шторке Android (Quick Settings Tile) -->
+        <service
+            android:name=".service.VpnTileService"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="PC VPN"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Интерактивный Виджет рабочего стола (App Widget) -->
+        <receiver
+            android:name=".receiver.VpnWidgetProvider"
+            android:exported="true"
+            android:label="PC VPN">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.pcvpn.WIDGET_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/vpn_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

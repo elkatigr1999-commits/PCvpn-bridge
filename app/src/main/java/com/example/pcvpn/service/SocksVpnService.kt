@@ -53,6 +53,14 @@ class SocksVpnService : VpnService() {
     private var tun2SocksEngine: Socks5Tun2Socks? = null
     private val vpnMutex = Mutex()
 
+    private fun updateState(newState: VpnState) {
+        _connectionState.value = newState
+        try {
+            VpnTileService.updateTile(this)
+            com.example.pcvpn.receiver.VpnWidgetProvider.updateAllWidgets(this)
+        } catch (ignored: Exception) {}
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_CONNECT -> {
@@ -82,11 +90,11 @@ class SocksVpnService : VpnService() {
 
         val host = MdnsResolver.formatHost(rawHost)
         if (host.isEmpty()) {
-            _connectionState.value = VpnState.Error("Хост или IP-адрес не указан")
+            updateState(VpnState.Error("Хост или IP-адрес не указан"))
             return
         }
 
-        _connectionState.value = VpnState.Connecting
+        updateState(VpnState.Connecting)
         UniversalProxyClient.resetCache()
         startForegroundServiceNotification("Подключение к $host:$port...")
 
@@ -107,7 +115,7 @@ class SocksVpnService : VpnService() {
 
             if (!testResult.success) {
                 AppLogger.e("VPN", "Ошибка рукопожатия с ПК: ${testResult.message}")
-                _connectionState.value = VpnState.Error(testResult.message)
+                updateState(VpnState.Error(testResult.message))
                 stopSelf()
                 return
             }
@@ -161,7 +169,7 @@ class SocksVpnService : VpnService() {
             vpnInterface = pfd
 
             if (pfd == null) {
-                _connectionState.value = VpnState.Error("Не удалось создать VPN интерфейс")
+                updateState(VpnState.Error("Не удалось создать VPN интерфейс"))
                 stopSelf()
                 return
             }
@@ -181,11 +189,11 @@ class SocksVpnService : VpnService() {
             tun2SocksEngine = engine
             engine.start(vpnInput, vpnOutput)
 
-            _connectionState.value = VpnState.Connected(host, port, targetIpStr)
+            updateState(VpnState.Connected(host, port, targetIpStr))
             updateNotification("Подключено к $host:$port (${testResult.proxyType.name})")
 
         } catch (e: Exception) {
-            _connectionState.value = VpnState.Error("Ошибка VPN: ${e.localizedMessage}")
+            updateState(VpnState.Error("Ошибка VPN: ${e.localizedMessage}"))
             stopSelf()
         }
     }
@@ -201,7 +209,7 @@ class SocksVpnService : VpnService() {
         tun2SocksEngine = null
         localProxyRelay = null
         vpnInterface = null
-        _connectionState.value = VpnState.Disconnected
+        updateState(VpnState.Disconnected)
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 

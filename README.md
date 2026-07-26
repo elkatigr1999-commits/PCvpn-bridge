@@ -57,6 +57,8 @@ If you want to connect using your computer's name (e.g., `desktop-pc`) instead o
 
 ## ✨ Key Features
 
+- 📲 **Quick Settings Tile (Notification Shade)**: Toggle VPN connection directly from Android's top notification curtain/shade without opening the app.
+- 🧩 **Home Screen App Widget**: Interactive widget for your smartphone home screen with real-time status indicator and 1-tap Connect/Disconnect button.
 - ⚡ **Protocol Auto-Detection**: Automatically detects **SOCKS5**, **HTTP CONNECT**, or **Direct TCP** on your PC proxy port.
 - 🌐 **Native `.local` Hostname Resolution (mDNS RFC 6762)**: Sends multicast UDP queries over Wi-Fi to resolve PC IP addresses in 10ms.
 - 🔑 **Optional Authentication**: Supports optional login and password for authenticated SOCKS5/HTTP proxies.
