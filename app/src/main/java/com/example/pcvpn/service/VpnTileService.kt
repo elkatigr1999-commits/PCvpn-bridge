@@ -3,12 +3,14 @@ package com.example.pcvpn.service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.net.VpnService
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import com.example.pcvpn.MainActivity
+import com.example.pcvpn.R
 import com.example.pcvpn.data.ProfileManager
 import com.example.pcvpn.utils.AppStrings
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +70,8 @@ class VpnTileService : TileService() {
         val tile = qsTile ?: return
         val profileManager = ProfileManager(this)
         val lang = profileManager.getAppLanguage()
+
+        tile.icon = Icon.createWithResource(this, R.drawable.ic_qs_vpn_tile)
 
         when (state) {
             is SocksVpnService.VpnState.Connected -> {
