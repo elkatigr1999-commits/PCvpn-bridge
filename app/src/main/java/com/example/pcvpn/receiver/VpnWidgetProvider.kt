@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
+import android.os.Build
 import android.widget.RemoteViews
 import com.example.pcvpn.MainActivity
 import com.example.pcvpn.R
@@ -33,14 +34,18 @@ class VpnWidgetProvider : AppWidgetProvider() {
                 val disconnectIntent = Intent(context, SocksVpnService::class.java).apply {
                     action = SocksVpnService.ACTION_DISCONNECT
                 }
-                context.startService(disconnectIntent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(disconnectIntent)
+                } else {
+                    context.startService(disconnectIntent)
+                }
             } else {
                 val selectedProfile = profileManager.getSelectedProfile()
                 if (selectedProfile != null && selectedProfile.host.isNotBlank()) {
                     val prepareIntent = VpnService.prepare(context)
                     if (prepareIntent != null) {
                         val mainIntent = Intent(context, MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
                         context.startActivity(mainIntent)
                     } else {
@@ -51,11 +56,15 @@ class VpnWidgetProvider : AppWidgetProvider() {
                             putExtra(SocksVpnService.EXTRA_USER, selectedProfile.login)
                             putExtra(SocksVpnService.EXTRA_PASS, selectedProfile.password)
                         }
-                        context.startService(connectIntent)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(connectIntent)
+                        } else {
+                            context.startService(connectIntent)
+                        }
                     }
                 } else {
                     val mainIntent = Intent(context, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
                     context.startActivity(mainIntent)
                 }

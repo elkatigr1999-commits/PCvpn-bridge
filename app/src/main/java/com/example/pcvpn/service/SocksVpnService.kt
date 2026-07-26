@@ -68,6 +68,10 @@ class SocksVpnService : VpnService() {
                 val port = intent.getIntExtra(EXTRA_PORT, DEFAULT_PORT)
                 val user = intent.getStringExtra(EXTRA_USER) ?: ""
                 val pass = intent.getStringExtra(EXTRA_PASS) ?: ""
+
+                startForegroundServiceNotification("Подключение к $rawHost:$port...")
+                updateState(VpnState.Connecting)
+
                 serviceScope.launch {
                     vpnMutex.withLock {
                         startVpnInternal(rawHost, port, user, pass)

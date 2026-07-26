@@ -1,5 +1,6 @@
 package com.example.pcvpn.service
 
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -32,22 +33,48 @@ class VpnTileService : TileService() {
         super.onClick()
         val currentState = SocksVpnService.connectionState.value
         val profileManager = ProfileManager(this)
+        val lang = profileManager.getAppLanguage()
+        val tile = qsTile
 
         if (currentState is SocksVpnService.VpnState.Connected || currentState is SocksVpnService.VpnState.Connecting) {
+            // 1. Мгновенная визуальная анимация отключения плитки
+            tile?.state = Tile.STATE_INACTIVE
+            tile?.label = "PC VPN"
+            tile?.subtitle = AppStrings.get("disconnected", lang)
+            tile?.updateTile()
+
             val intent = Intent(this, SocksVpnService::class.java).apply {
                 action = SocksVpnService.ACTION_DISCONNECT
             }
-            startService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
         } else {
             val selectedProfile = profileManager.getSelectedProfile()
             if (selectedProfile != null && selectedProfile.host.isNotBlank()) {
                 val prepareIntent = VpnService.prepare(this)
                 if (prepareIntent != null) {
                     val mainIntent = Intent(this, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
-                    startActivityAndCollapse(mainIntent)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        val pendingIntent = PendingIntent.getActivity(
+                            this, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE
+                        )
+                        startActivityAndCollapse(pendingIntent)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        startActivityAndCollapse(mainIntent)
+                    }
                 } else {
+                    // 2. Мгновенная визуальная анимация подсветки активной плитки
+                    tile?.state = Tile.STATE_ACTIVE
+                    tile?.label = "PC VPN"
+                    tile?.subtitle = AppStrings.get("connecting", lang)
+                    tile?.updateTile()
+
                     val intent = Intent(this, SocksVpnService::class.java).apply {
                         action = SocksVpnService.ACTION_CONNECT
                         putExtra(SocksVpnService.EXTRA_HOST, selectedProfile.host)
@@ -55,13 +82,26 @@ class VpnTileService : TileService() {
                         putExtra(SocksVpnService.EXTRA_USER, selectedProfile.login)
                         putExtra(SocksVpnService.EXTRA_PASS, selectedProfile.password)
                     }
-                    startService(intent)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent)
+                    } else {
+                        startService(intent)
+                    }
                 }
             } else {
+                // Если профиль не настроен — открываем главное окно
                 val mainIntent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
-                startActivityAndCollapse(mainIntent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val pendingIntent = PendingIntent.getActivity(
+                        this, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE
+                    )
+                    startActivityAndCollapse(pendingIntent)
+                } else {
+                    @Suppress("DEPRECATION")
+                    startActivityAndCollapse(mainIntent)
+                }
             }
         }
     }
